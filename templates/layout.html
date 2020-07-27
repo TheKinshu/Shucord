@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+        <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+        <title>Shucord</title>
+        {% block head %} {% endblock %}
+    </head>
+
+    <body>
+        <div class="nav-bar">
+            <p class="channelT">Channel</p>
+            <button class="addChannel" id="newChannel">Add Channel</button>
+            <ul id="channelB"> 
+                <li><a href="#">("Default")General</a></li>
+                {% block sidebar %} {% endblock %}
+            </ul>
+            <button id="logout">Logout</button>
+        </div>
+        <div class="content">
+            <ul id="mBoard">
+            </ul>
+            {% block contents %} {% endblock %}
+        </div>
+        <div class="onlineBar">
+            <ul id="userID">
+                {% block accounts %} {% endblock %} 
+            </ul>
+        </div>
+    </body>
+</html>

@@ -92,7 +92,7 @@ def displayMess(data):
     tempList = []
     for i in range(len(channelMessage[data['room']])):
         tempList.append(channelMessage[data['room']][i])
-    emit("updateMessage", {"channelMess": tempList}, broadcast=True)
+    emit("updateMessage", {"channelMess": tempList})
     
 if __name__ == '__main__':
     socketio.run(app)

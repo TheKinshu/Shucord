@@ -116,6 +116,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     localStorage.setItem('last_channel', button.dataset.channel)                
                     last_channel = localStorage.getItem('last_channel');
                     socket.emit('join', {"username": user, "room": last_channel});
+                    socket.emit('redisplayMessage',{"room": last_channel});
                 }
             };
         });

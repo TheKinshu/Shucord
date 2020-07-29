@@ -39,7 +39,6 @@ def home():
         # Username is avaliable and will be redirect to the main page
         return render_template("index.html")
 
-
 @socketio.on("loginUser")
 def login(data):
     print("Checking user")
@@ -90,10 +89,10 @@ def addChan(data):
 
 @socketio.on('redisplayMessage')
 def displayMess(data):
-    currentRoom = data['room']
-    emit("updateMessage", {"channelMess": channelMessage[currentRoom]}, broadcast=True)
-
-
+    tempList = []
+    for i in range(len(channelMessage[data['room']])):
+        tempList.append(channelMessage[data['room']][i])
+    emit("updateMessage", {"channelMess": tempList}, broadcast=True)
     
 if __name__ == '__main__':
     socketio.run(app)

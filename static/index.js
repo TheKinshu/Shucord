@@ -32,17 +32,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Connect to websocket
     var socket = io.connect(location.protocol + '//' + document.domain + ':' + location.port);
-
     // When connected, configure buttons
     socket.on('connect', () => {
 
         user = localStorage.getItem('user');
+        last_channel = localStorage.getItem('last_channel');
 
+        if(last_channel == null || last_channel != ""){
+            last_channel = "General"
+        }
         if(user != null || user != ""){
             socket.emit('join', {"username": user, "room": last_channel});
             socket.emit('addchannel', {"room": ""});
             socket.emit('redisplayMessage',{"room": last_channel});
-
         }
 
         document.querySelector('button#sendMessage').onclick = ()=>{
@@ -78,7 +80,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     socket.on('updateMessage', data => {
-        alert("update");
         var messageList = document.querySelector('#mBoard');
 
         while(messageList.firstChild){

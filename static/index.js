@@ -1,23 +1,27 @@
 var user = "";
-var last_channel = "";
-
+var last_channel = "General";
+var unlock = false;
 
 function login(){
     document.querySelector("button#login").onclick = ()=>{
-        user = document.getElementById("lInput").value;
+        let userCheck = document.getElementById("lInput").value;
 
+        // Check if user is new
         if(localStorage.getItem('user') == null || localStorage.getItem('user' == "")){
-            if(user == null || user == ""){
+            // Check if user has enter username
+            if(userCheck == null || userCheck == ""){
                 alert("Please enter a valid username")
             }
             else{
-                localStorage.setItem('user', user);
+                // If information has been enter
+                // Set information for later usage
+                localStorage.setItem('user', userCheck);
+                socket.emit('loginUser', {"user": userCheck});
                 location.replace("/home");
             }
         }
         else{
             user = localStorage.getItem('user');
-            socket.emit('loginUser', {"user": user});
             location.replace("/home");
         }
 
@@ -33,7 +37,74 @@ document.addEventListener('DOMContentLoaded', () => {
     socket.on('connect', () => {
 
         user = localStorage.getItem('user');
-        
+        if(user != null || user != ""){
+            socket.emit('join', {"username": user, "room": last_channel});
+            socket.emit('addchannel', {"room": ""});
+        }
+
+        document.querySelector('button#sendMessage').onclick = ()=>{
+            let uInput = document.querySelector("#uText").value;
+
+            let today = new Date();
+            let time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
+
+            if(uInput != ""){
+                socket.send(user + " <" + time + ">: <br>" + uInput);
+                document.querySelector("#uText").value = "";
+            }
+        }
+
+        document.querySelector('button#newChannel').onclick = () => {
+            let nChannel = prompt("Please Enter a new channel name");
+
+            // Check if user enter something
+            if(nChannel == "" || nChannel == null){
+                alert("Invalid Channel name");
+            }
+            else{
+                socket.emit('addchannel', {"room": nChannel});
+            }
+        }
+
+    });
+
+    socket.on('message', data => {
+        const li = document.createElement('li');
+        li.innerHTML = `${data}`;
+        document.querySelector('#mBoard').append(li);
+    });
+
+    socket.on('displayChannel', data => {
+        var channelList = document.querySelector('#channelB');
+
+        // Remove all current channel
+        while(channelList.firstChild){
+            channelList.removeChild(channelList.firstChild);
+        }
+
+        // Loops through a list and re-enter any new channels that has been created
+        for(i = 0; i < data.channels.length; i++){
+            const li = document.createElement('li');
+            let cName = data.channels[i];
+
+            li.innerHTML = `<button id="channel-change" data-channel="` + `${cName}` + `">` + `${cName}` + `</button>`;
+            document.querySelector('#channelB').append(li);
+        }
+
+        document.querySelectorAll('button#channel-change').forEach(function(button) {
+            button.onclick = function() {
+                if(last_channel != button.dataset.channel){
+                    socket.emit('leave', {"username": user, "room": last_channel});
+                    localStorage.setItem('last_channel', button.dataset.channel)                
+                    last_channel = localStorage.getItem('last_channel');
+                    socket.emit('join', {"username": user, "room": last_channel});
+                }
+            };
+        });
+    });
+
+    socket.on('error', data => {
+        alert("Error: " + data.error)
     });
 
 });

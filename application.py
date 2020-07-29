@@ -57,7 +57,6 @@ def login(data):
 @socketio.on('message')
 def handle_message(message):
     currentRoom = session.get("last_channel")
-    print(currentRoom + " fasdfasfdafd")
     channelMessage[currentRoom].append(message)
     send(message, room=currentRoom, broadcast=True)
 
@@ -88,6 +87,12 @@ def addChan(data):
         channels.append(newChannel)
         channelMessage[newChannel] = deque()
         emit("displayChannel", {"channels": channels}, broadcast=True)
+
+@socketio.on('redisplayMessage')
+def displayMess(data):
+    currentRoom = data['room']
+    emit("updateMessage", {"channelMess": channelMessage[currentRoom]}, broadcast=True)
+
 
     
 if __name__ == '__main__':

@@ -37,9 +37,12 @@ document.addEventListener('DOMContentLoaded', () => {
     socket.on('connect', () => {
 
         user = localStorage.getItem('user');
+
         if(user != null || user != ""){
             socket.emit('join', {"username": user, "room": last_channel});
             socket.emit('addchannel', {"room": ""});
+            socket.emit('redisplayMessage',{"room": last_channel});
+
         }
 
         document.querySelector('button#sendMessage').onclick = ()=>{
@@ -72,6 +75,21 @@ document.addEventListener('DOMContentLoaded', () => {
         const li = document.createElement('li');
         li.innerHTML = `${data}`;
         document.querySelector('#mBoard').append(li);
+    });
+
+    socket.on('updateMessage', data => {
+        alert("update");
+        var messageList = document.querySelector('#mBoard');
+
+        while(messageList.firstChild){
+            messageList.removeChild(messageList.firstChild);
+        }
+
+        for(i = 0; i < data.channelMess.length; i++){
+            const li = document.createElement('li');
+            li.innerHTML = `${data[i]}`;
+            document.querySelector('#mBoard').append(li);
+        }
     });
 
     socket.on('displayChannel', data => {

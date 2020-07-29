@@ -85,10 +85,9 @@ document.addEventListener('DOMContentLoaded', () => {
         while(messageList.firstChild){
             messageList.removeChild(messageList.firstChild);
         }
-
         for(i = 0; i < data.channelMess.length; i++){
             const li = document.createElement('li');
-            li.innerHTML = `${data[i]}`;
+            li.innerHTML = `${data.channelMess[i]}`;
             document.querySelector('#mBoard').append(li);
         }
     });

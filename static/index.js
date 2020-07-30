@@ -1,6 +1,7 @@
 var user = "";
 var last_channel = "General";
 var unlock = false;
+var uInput;
 
 function login(){
     document.querySelector("button#login").onclick = ()=>{
@@ -33,6 +34,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // Connect to websocket
     var socket = io.connect(location.protocol + '//' + document.domain + ':' + location.port);
     // When connected, configure buttons
+    uInput = document.querySelector("#uText");
+
     socket.on('connect', () => {
 
         user = localStorage.getItem('user');
@@ -45,7 +48,7 @@ document.addEventListener('DOMContentLoaded', () => {
             socket.emit('join', {"username": user, "room": last_channel});
             socket.emit('addchannel', {"room": ""});
             socket.emit('redisplayMessage',{"room": last_channel});
-        }
+        };
 
         document.querySelector('button#sendMessage').onclick = ()=>{
             let uInput = document.querySelector("#uText").value;
@@ -73,6 +76,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     });
 
+    window.addEventListener("keydown", function (e){
+        if(e.keyCode === 13){
+            document.querySelector('button#sendMessage').click();
+        }
+    });
     socket.on('message', data => {
         const li = document.createElement('li');
         li.innerHTML = `${data}`;

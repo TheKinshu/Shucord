@@ -4,14 +4,16 @@
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
         <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/socket.io/1.3.6/socket.io.min.js"></script>
-        <script src="{{ url_for('static', filename='index.js') }}"></script>
+        <script src="{{ url_for('static', filename='login.js') }}"></script>
         <title>Shucord Login</title>
     </head>
 
     <body>
-        <div class="nav-bar">
-            <input type="text" id="lInput">
-            <button onclick=login() id="login">Login</button>
-        </div>
+        <form method="POST" action="{{url_for('home')}}">
+            <div class="nav-bar">
+                <input type="text" name="lInput" id="lInput">
+                <button onclick=login() id="login">Login</button>
+            </div>
+        </form>
     </body>
 </html>

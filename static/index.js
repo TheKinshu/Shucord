@@ -3,52 +3,36 @@ var last_channel = "General";
 var unlock = false;
 var uInput;
 
-function login(){
-    document.querySelector("button#login").onclick = ()=>{
-        let userCheck = document.getElementById("lInput").value;
 
-        // Check if user is new
-        if(localStorage.getItem('user') == null || localStorage.getItem('user' == "")){
-            // Check if user has enter username
-            if(userCheck == null || userCheck == ""){
-                alert("Please enter a valid username")
-            }
-            else{
-                // If information has been enter
-                // Set information for later usage
-                localStorage.setItem('user', userCheck);
-                socket.emit('loginUser', {"user": userCheck});
-                location.replace("/home");
-            }
-        }
-        else{
-            user = localStorage.getItem('user');
-            location.replace("/home");
-        }
-
-    }
-}
 
 document.addEventListener('DOMContentLoaded', () => {
 
     // Connect to websocket
     var socket = io.connect(location.protocol + '//' + document.domain + ':' + location.port);
     // When connected, configure buttons
-    uInput = document.querySelector("#uText");
-
     socket.on('connect', () => {
 
+        // Check if user is new
         user = localStorage.getItem('user');
-        last_channel = localStorage.getItem('last_channel');
+        // Check last use chat channel
+        if(localStorage.getItem('last_channel') != null)
+            last_channel = localStorage.getItem('last_channel');
 
-        if(last_channel == null || last_channel != ""){
+        // If local storage stored empty string set last used channel to General
+        if(last_channel != "")
             last_channel = "General"
-        }
-        if(user != null || user != ""){
+        
+        // Check if user is new
+        if(user != null){
             socket.emit('join', {"username": user, "room": last_channel});
             socket.emit('addchannel', {"room": ""});
+            socket.emit('userDisplay');
             socket.emit('redisplayMessage',{"room": last_channel});
-        };
+            
+        }
+        else{
+            socket.emit('newUser');
+        }
 
         document.querySelector('button#sendMessage').onclick = ()=>{
             let uInput = document.querySelector("#uText").value;
@@ -61,6 +45,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 document.querySelector("#uText").value = "";
             }
         }
+        // Allow user to logout
+        document.querySelector('button#logout').onclick = ()=>{
+            let log = confirm("Do you want to log off?")
+
+            // Checks if user clicked okay
+            if(log){
+                socket.emit("logout", {"user": user});
+                localStorage.clear();
+                location.replace("/")
+            }
+        };
 
         document.querySelector('button#newChannel').onclick = () => {
             let nChannel = prompt("Please Enter a new channel name");
@@ -88,7 +83,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     socket.on('updateMessage', data => {
-        var messageList = document.querySelector('#mBoard');
+        let messageList = document.querySelector('#mBoard');
 
         while(messageList.firstChild){
             messageList.removeChild(messageList.firstChild);
@@ -100,8 +95,22 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    socket.on('displayUsers', data => {
+        let userList = document.querySelector("userID");
+        while(userList.firstChild){
+            userList.removeChild(userList.firstChild);
+        }
+
+        for(i = 0; i < data.users.length; i++){
+            const li = document.createElement('li');
+            let username = data.users[i];
+            li.innerHTML = `${username}`;
+            document.querySelector('#userID').append(li);
+        }
+    });
+
     socket.on('displayChannel', data => {
-        var channelList = document.querySelector('#channelB');
+        let channelList = document.querySelector('#channelB');
 
         // Remove all current channel
         while(channelList.firstChild){
@@ -130,8 +139,19 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
+    socket.on('displayAll', data => {
+
+        user = localStorage.setItem('user', data.user);
+        socket.emit('join', {"username": data.user, "room": last_channel});
+        socket.emit('addchannel', {"room": ""});
+        socket.emit('userDisplay');
+        socket.emit('redisplayMessage',{"room": last_channel});
+    })
     socket.on('error', data => {
         alert("Error: " + data.error)
+        if(data.status === 101){
+            location.replace("/");
+        }
     });
 
 });

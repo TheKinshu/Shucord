@@ -5,7 +5,7 @@ from flask import Flask, render_template, request, redirect, session
 from flask_socketio import SocketIO, emit, join_room, leave_room, send, Namespace
 
 app = Flask(__name__)
-app.config["SECRET_KEY"] = os.getenv("SECRET_KEY")
+app.config["SECRET_KEY"] = "my secret key"
 socketio = SocketIO(app)
 
 # Define variables
@@ -26,32 +26,25 @@ def index():
     return render_template("login.html")
 
 
-@app.route("/home")
+@app.route("/home", methods=["POST"])
 def home():
-    
-    # Checking if username has been taken
-    if session.get("dupUser") == "True":
-        # Give user an error message, stating that the name has already been taken
-        # Redirect them to login screen
-        emit("error", {"error": "Username has already been taken. Please try again!"})
-        return render_template("login.html")
-    else:
-        # Username is avaliable and will be redirect to the main page
-        return render_template("index.html")
+    lInput = request.form.get("lInput")
 
-@socketio.on("loginUser")
-def login(data):
-    print("Checking user")
+    if lInput == None or lInput == "":
+        return redirect("/")
+
+
     # Checking for duplicate usernames
-    if data['user'] not in user: 
-        # Username is unique and can proceed
-        user.append(data['user'])
-        session["dupUser"] = "False"
-        session["currentUser"] = data['user']
+    if lInput not in user: 
+        # Username is unique and can proceed to be added
+        user.append(lInput)
+        session["user"] = str(lInput)
 
-    else:
-        # Duplicate username has been found
-        session["dupUser"] = "True"
+    return render_template("index.html")
+
+@socketio.on("newUser")
+def login():
+    emit("displayAll", {"user": session.get("user")})
 
 @socketio.on('message')
 def handle_message(message):
@@ -86,6 +79,10 @@ def addChan(data):
         channels.append(newChannel)
         channelMessage[newChannel] = deque()
         emit("displayChannel", {"channels": channels}, broadcast=True)
+
+@socketio.on('userDisplay')
+def userDis():
+    emit("displayUsers",{"users": user}, broadcast=True)
 
 @socketio.on('redisplayMessage')
 def displayMess(data):

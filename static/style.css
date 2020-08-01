@@ -29,6 +29,12 @@ ul li {
   color: grey;
 }
 
+h1 {
+  color: white;
+  text-align: center;
+  background-color: #3d4869;
+}
+
 li a {
   list-style: none;
   font-size: 1.4vw;

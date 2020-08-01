@@ -85,6 +85,9 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     socket.on('updateMessage', data => {
+
+        document.querySelector("#roomName").innerHTML = last_channel;
+        
         let messageList = document.querySelector('#mBoard');
 
         while(messageList.firstChild){

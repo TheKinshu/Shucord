@@ -26,20 +26,26 @@ def index():
     return render_template("login.html")
 
 
-@app.route("/home", methods=["POST"])
+@app.route("/home", methods=["GET","POST"])
 def home():
-    lInput = request.form.get("lInput")
+    # Only trigger if user has submit username
+    if request.method == "POST":
 
-    if lInput == None or lInput == "":
-        return redirect("/")
+        # Grabs user input
+        lInput = request.form.get("lInput")
+
+        # Check user input
+        if lInput == None or lInput == "":
+            return redirect("/")
 
 
-    # Checking for duplicate usernames
-    if lInput not in user: 
-        # Username is unique and can proceed to be added
-        user.append(lInput)
-        session["user"] = str(lInput)
+        # Checking for duplicate usernames
+        if lInput not in user: 
+            # Username is unique and can proceed to be added
+            user.append(lInput)
+            session["user"] = str(lInput)
 
+    # If everythings is checked, direct them to home page
     return render_template("index.html")
 
 @socketio.on("newUser")
@@ -83,6 +89,15 @@ def addChan(data):
 @socketio.on('userDisplay')
 def userDis():
     emit("displayUsers",{"users": user}, broadcast=True)
+
+@socketio.on('logout')
+def logOut(data):
+    session.clear()
+    session["user"] = None
+    print(session["user"])
+    if data['user'] in user:
+        user.remove(data['user'])
+    
 
 @socketio.on('redisplayMessage')
 def displayMess(data):

@@ -11,7 +11,6 @@ document.addEventListener('DOMContentLoaded', () => {
     var socket = io.connect(location.protocol + '//' + document.domain + ':' + location.port);
     // When connected, configure buttons
     socket.on('connect', () => {
-
         // Check if user is new
         user = localStorage.getItem('user');
         // Check last use chat channel
@@ -19,10 +18,10 @@ document.addEventListener('DOMContentLoaded', () => {
             last_channel = localStorage.getItem('last_channel');
 
         // If local storage stored empty string set last used channel to General
-        if(last_channel != "")
+        if(last_channel == "")
             last_channel = "General"
-        
-        // Check if user is new
+
+        // Check if user account
         if(user != null){
             socket.emit('join', {"username": user, "room": last_channel});
             socket.emit('addchannel', {"room": ""});
@@ -39,7 +38,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
             let today = new Date();
             let time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
-
+            if(user == null){
+                user = localStorage.getItem('user'); 
+            }
             if(uInput != ""){
                 socket.send(user + " <" + time + ">: <br>" + uInput);
                 document.querySelector("#uText").value = "";
@@ -53,6 +54,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if(log){
                 socket.emit("logout", {"user": user});
                 localStorage.clear();
+                user = "";
                 location.replace("/")
             }
         };
@@ -96,7 +98,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     socket.on('displayUsers', data => {
-        let userList = document.querySelector("userID");
+        let userList = document.querySelector("#userID");
         while(userList.firstChild){
             userList.removeChild(userList.firstChild);
         }

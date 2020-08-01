@@ -1,3 +1,15 @@
+// This function is for checking if user had logged out before
+function logged(){
+
+    if(localStorage.getItem('user') == null){
+        // If localstorage is empty do nothing
+    }
+    else{
+        // If user did not log out redirect them back to home page
+        location.replace("/home");
+    }
+}
+
 function login(){
     document.querySelector("button#login").onclick = ()=>{
         let userCheck = document.getElementById("lInput").value;

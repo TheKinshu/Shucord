@@ -29,6 +29,10 @@ ul li {
   color: grey;
 }
 
+img{
+  width: 200px;
+}
+
 h1 {
   color: white;
   text-align: center;

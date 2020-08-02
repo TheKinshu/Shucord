@@ -32,6 +32,15 @@ document.addEventListener('DOMContentLoaded', () => {
         else{
             socket.emit('newUser');
         }
+        
+        // Upload image to local "Client side only"
+        document.querySelector('input[type=file]#imageUp').addEventListener('input', function (evt) {
+            let today = new Date();
+            let time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
+            let file = this.files[0];
+            let url = URL.createObjectURL(file);
+            socket.send(user + " <" + time + ">: <br>" + "<img src=" + url + "></img>");
+        });
 
         document.querySelector('button#sendMessage').onclick = ()=>{
             let uInput = document.querySelector("#uText").value;

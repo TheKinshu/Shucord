@@ -67,8 +67,12 @@ def handle_message(message):
 @socketio.on('join')
 def on_join(data):
     username = data['username']
-    room = data['room']
-    session["last_channel"] = room
+    if data['room'] not in channels:
+        room = "General"
+        session["last_channel"] = room
+    else:
+        room = data['room']
+        session["last_channel"] = room
     join_room(room)
     send(username + ' has entered the ' + room + '.', room=room)
 
@@ -117,9 +121,15 @@ def logOut(data):
 # Re-display message to broadcast to other users
 @socketio.on('redisplayMessage')
 def displayMess(data):
+    # Creating temp variable
     tempList = []
-    for i in range(len(channelMessage[data['room']])):
-        tempList.append(channelMessage[data['room']][i])
+    tempRoom = data['room']
+
+    if data['room'] not in channels:
+        tempRoom = "General"
+
+    for i in range(len(channelMessage[tempRoom])):
+        tempList.append(channelMessage[tempRoom][i])
     emit("updateMessage", {"channelMess": tempList})
     
 if __name__ == '__main__':
